@@ -1,0 +1,179 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false">
+    <apex:slds />
+    <apex:remoteObjects >
+        <apex:remoteObjectModel name="pslPractice__Vote__c" jsShorthand="Vote"></apex:remoteObjectModel>
+    </apex:remoteObjects>
+    <html>
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            
+            <title>Voice Of Persistent</title>
+            
+            <!-- Mobile Specific Metas
+================================================== -->
+            <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            
+            <!-- Fonts -->
+            <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700' rel='stylesheet' type='text/css' />
+            <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" />
+            
+            <link href="{!URLFOR($Resource.VOPAssets,'css/bootstrap.min.css')}" rel="stylesheet" />
+            <link href="{!URLFOR($Resource.VOPAssets,'css/style.css')}" rel="stylesheet" />
+            <link href="{!URLFOR($Resource.VOPAssets,'css/responsive.css')}" rel="stylesheet" />
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+            
+        </head>
+        <script>
+        window.onload = function() {
+            var anchors = document.getElementsByTagName('a');
+            for(var i = 0; i < anchors.length; i++) {
+                var anchor = anchors[i];
+                anchor.onclick = function() {
+                    var cName = getCookie("cookiestatus");
+                    if(cName == ''){
+                        document.getElementsByClassName('wrapper')[0].style.display = 'block';
+                        code = this.getAttribute('name');
+                        try{
+                            var voteDetails = { Name: code};
+                            var ct = new SObjectModel.Vote();
+                            ct.create(voteDetails, function(err) {
+                                if(err) { 
+                                    console.log(err);
+                                    alert(err.message);
+                                }
+                                else {
+                                    document.getElementById("btn_modal").click();
+                                    document.cookie = "cookiestatus=true";
+                                    var allanchors = document.getElementsByClassName('slds-col');
+                                    for(var i = 0; i<allanchors.length;i++){
+                                        allanchors[i].style.pointerEvents="none";
+                                        allanchors[i].style.pointerEvents="default";
+                                    }
+                                }
+                                document.getElementsByClassName('wrapper')[0].style.display = 'none';
+                            });
+                        }catch(e){
+                            alert(e);
+                        } 
+                    }else{
+                        document.getElementById('btn_modal1').click();
+                    }
+                    
+                }
+            }
+        }
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('window - DOMContentLoaded - capture'); // 1st
+            var cName = getCookie("cookiestatus");
+            //alert(cName);
+            if(cName == '')
+                console.log('cookie is not set');//document.cookie = "cookiestatus=true";
+            else{
+                var allanchors = document.getElementsByClassName('slds-col');
+                for(var i = 0; i<allanchors.length;i++){
+                    allanchors[i].style.pointerEvents="none";
+                    allanchors[i].style.pointerEvents="default";
+                }
+                document.getElementById('btn_modal1').click();
+            }
+            
+        }, true);
+        
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+        
+        </script>
+        <body>
+            <div class="wrapper">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="container hero">
+                <div class="row mainDiv" style="margin-top:10%; text-align:center">
+                    <span class="hero-text" style="display: inline-block;">Votings for Round 1 are closed.</span>
+                </div>
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="atul_shenoy"><img src="{!URLFOR($Resource.VOPAssets,'img/Atul_Shenoy.jpg')}" class="img-thumbnail eliminate" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Atul Shenoy</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="bharat_lele"><img src="{!URLFOR($Resource.VOPAssets,'img/Bharat_Lele.jpg')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Bharat Lele</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="girija_ghatge"><img src="{!URLFOR($Resource.VOPAssets,'img/girija_ghatge.jpg')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Girija Ghatge</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="joginder_singh"><img src="{!URLFOR($Resource.VOPAssets,'img/Joginder_Singh_1.JPG')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Joginder Singh</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="mandar_gadgil"><img src="{!URLFOR($Resource.VOPAssets,'img/Mandar_Gadgil_Photo_1.jpg')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;" >Mandar Gadgil</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="mandar_gokhale"><img src="{!URLFOR($Resource.VOPAssets,'img/mandar_gokhale.jpg')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Mandar Gokhale</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="sayali_kelkar"><img src="{!URLFOR($Resource.VOPAssets,'img/Sayal_K.png')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Sayali Kelkar</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="shruti_kulkarni"><img src="{!URLFOR($Resource.VOPAssets,'img/Shruti_Kulkarni.jpg')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Shruti Kulkarni</p></a>
+                    </div>
+                    <div class="slds-col slds-small-size_1-of-2 slds-medium-size_1-of-2 slds-large-size_1-of-3" style="text-align:center;">
+                        <a name="yash_alatekar"><img src="{!URLFOR($Resource.VOPAssets,'img/yash_alatekar.jpg')}" class="img-thumbnail" style="width: 150px;display: inline-block;" /> <p class="title" style="font-size: 13px;font-weight: bold;font-style: oblique;color: chartreuse;">Yash Alatekar</p></a>
+                    </div>
+                </div>
+            </div>
+            <button id="btn_modal" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" style="display:none;"></button>
+            <button id="btn_modal1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1" style="display:none;"></button>
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+                    
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-body" style="height: 50em;background : url('https://images-na.ssl-images-amazon.com/images/I/61Gis9qnDmL._SL1500_.jpg');opacity:0.5;">
+                            <center>
+                                <div>
+                                    <img src="{!URLFOR($Resource.VOPAssets,'img/thanks.png')}" style="width:23em; height:23em;" />
+                                </div>
+                                <p style="font-size: x-large;">Thank You ! Your response has been submitted successfully.</p>
+                            </center>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="modal fade" id="myModal1" role="dialog">
+                <div class="modal-dialog">
+                    
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-body" style="height: 50em;background : url('https://images-na.ssl-images-amazon.com/images/I/61Gis9qnDmL._SL1500_.jpg');opacity:0.5;">
+                            <center>
+                                <div>
+                                    <img src="{!URLFOR($Resource.VOPAssets,'img/thanks.png')}" style="width:23em; height:23em;" />
+                                </div>
+                                <p style="font-size: x-large;">Your have already submitted your response.You will not be able to vote again.</p>
+                            </center>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </body>
+    </html>
+</apex:page>

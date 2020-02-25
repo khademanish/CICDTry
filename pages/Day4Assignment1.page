@@ -1,0 +1,20 @@
+<apex:page controller="invoiceController">
+<apex:form > 
+   <apex:pageBlock title="Invoices"  >
+        <apex:pageblockTable value="{!invoice}"  var="inv" >
+           <apex:column > 
+               <apex:commandLink >{!inv.name}</apex:commandLink> 
+                   <apex:pageBlockSection title="Line Items">
+                       <apex:pageBlockTable value="{!invoice[inv]}" var="ln">
+                       <apex:column >
+                           <apex:outputText >{!ln.name}</apex:outputText>
+                       </apex:column>
+                       </apex:pageBlockTable>
+                   </apex:pageBlockSection>
+           </apex:column>
+        </apex:pageblockTable>
+        
+        
+    </apex:pageBlock>
+</apex:form>
+</apex:page>

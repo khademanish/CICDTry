@@ -1,0 +1,1308 @@
+<apex:page controller="eKYCBioController" lightningStylesheets="true" showHeader="false" sidebar="false" >
+ <apex:includeLightning /> 
+<html>
+<head>
+
+<title>eKYC Biometric Portal</title>
+       
+    <script>
+
+function failCall(status,msg) { 
+    /*  
+        If you reach here, user is probabaly not running the 
+        service. Redirect the user to a page where he can download the
+        executable and install it. 
+    */
+    //alert();
+    //location.reload();
+    if(status=="No_Reload"){
+        alert(msg);
+    }else{
+        alert("E KYC Authentication Failed.Info :"+msg);
+        //document.getElementById("error").innerHTML = '<label for="pass" class="slds-form-element__label">Error :'+msg+'</label>';
+        
+        location.reload();
+        return false;
+        /*
+        if (confirm("E KYC Authentication Failed.\n\nInfo :"+msg) == true) {
+            location.reload();
+        } else {
+            location.reload();
+        }
+        */
+    }
+    
+}
+    
+function eKYCBioInfo(udcVal,pidVal){
+    $("#spinner_custom").show();
+
+    var aadharno = $('#aadharno').val();
+    
+    //var   uri     = "https://bfl-api-dev.azure-api.net/BFLEKYCWS/getBIOKYC";
+    var uri     = "https://bflapiprod.azure-api.net/BFLEKYCWS/getBIOKYC";
+    var xmlhttp = new XMLHttpRequest();
+    
+    // Get all user values from response
+    //var userImgSrc = 'man.jpg';
+    var homePageLink = "'index.html'";
+    var userName = "N/A";
+    var userGender = "N/A";
+    var userDOB = "N/A";
+    var userEmailId = "N/A";
+    var userPhoneNo = "N/A";
+    var userAddress = "N/A";
+    var userCity = "N/A";
+    var userState = "N/A";  
+    
+    var userImgSrc = 'data:image/png;base64,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';
+    
+    var image = new Image();
+    
+    xmlhttp.onreadystatechange=function() 
+    {       
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {           
+            var JsonArr = JSON.parse(xmlhttp.responseText);
+            
+            if(typeof(JsonArr.statusType.message) != "undefined" && JsonArr.statusType.message!== null){
+                if(JsonArr.statusType.message=="Failure"){
+                    failCall(xmlhttp.status,"Failed to get user information.Error Code received from server: "+JsonArr.statusType.code);
+                }
+            }else{
+                failCall(xmlhttp.status,"Unable get user information.Error Code received from server: "+JsonArr.statusType.code);
+            }           
+            if(typeof(JsonArr.customer_InfoType) != "undefined" && JsonArr.customer_InfoType!== null){
+                if(typeof(JsonArr.customer_InfoType.name.firstName) != "undefined" && JsonArr.customer_InfoType.name.firstName !== null){
+                    userName = JsonArr.customer_InfoType.name.firstName;
+                }
+                if(typeof(JsonArr.customer_InfoType.name.lastName) != "undefined" && JsonArr.customer_InfoType.name.lastName !== null ){
+                    userName += " "+JsonArr.customer_InfoType.name.lastName;
+                }
+                if(typeof(JsonArr.customer_InfoType.gender) != "undefined" && JsonArr.customer_InfoType.gender !== null ){
+                    userGender = JsonArr.customer_InfoType.gender;
+                }
+                if(typeof(JsonArr.customer_InfoType.dob) != "undefined" && JsonArr.customer_InfoType.dob !== null ){
+                    userDOB = JsonArr.customer_InfoType.dob;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.email) != "undefined" && JsonArr.customer_InfoType.address.email !== null ){
+                    userEmailId = JsonArr.customer_InfoType.address.email;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.phone) != "undefined" && JsonArr.customer_InfoType.address.phone !== null ){
+                    userPhoneNo = JsonArr.customer_InfoType.address.phone;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.loc) != "undefined" && JsonArr.customer_InfoType.address.loc !== null ){
+                    userAddress = JsonArr.customer_InfoType.address.loc;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.streetAddress) != "undefined" && JsonArr.customer_InfoType.address.streetAddress !== null ){
+                    userAddress += " "+JsonArr.customer_InfoType.address.streetAddress;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.city) != "undefined" && JsonArr.customer_InfoType.address.city !== null ){
+                    userAddress += " "+JsonArr.customer_InfoType.address.city;
+                    userCity = JsonArr.customer_InfoType.address.city;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.state) != "undefined" && JsonArr.customer_InfoType.address.state !== null ){
+                    userAddress += " "+JsonArr.customer_InfoType.address.state;
+                    userState = JsonArr.customer_InfoType.address.state;
+                }
+                if(typeof(JsonArr.customer_InfoType.image.value) != "undefined" && JsonArr.customer_InfoType.image.value !== null ){            
+                    userImgSrc = 'data:image/'+JsonArr.customer_InfoType.image.type+';base64,'+JsonArr.customer_InfoType.image.value;
+                }
+                
+                //set customized value on the basis of common response
+                $('.login-wrap').height('690px');
+                $('.login-html').height('670px');
+                
+                var newhtm = '<div class="sign-in-htm"><div class="group"></div>    <div class="group"><table border="0" width="90%" cellpadding="5" cellspacing="3" align="center"><tr><td colspan="2" align="center" ><div class="profile_pic-wrap"><img src="'+userImgSrc+'" alt="" /></div></td></tr>   <tr><td align="left" valign="top"><label for="user" class="label">Name </label></td><td align="left" valign="top"><span class="userInfo">'+userName+'</span></td></tr><tr><td align="left" valign="top"><label for="user" class="label">Gender </label></td><td align="left" valign="top"><span class="userInfo">'+userGender+'</span></td></tr><tr><td align="left" valign="top"><label for="user" class="label">DOB </label></td><td align="left" valign="top"><span class="userInfo">'+userDOB+'</span></td></tr><tr><td align="left" valign="top"><label for="user" class="label">Email Id </label></td><td align="left" valign="top"><span class="userInfo">'+userEmailId+'</span></td></tr><tr><td align="left" valign="top"><label for="user" class="label">Phone No. </label></td><td align="left" valign="top"><span class="userInfo">'+userPhoneNo+'</span></td></tr><tr><td align="left" valign="top"><label for="user" class="label">Address </label></td><td align="left" valign="top"><span class="userInfo">'+userAddress+'</span></td></tr><tr><td align="left" valign="top"><label for="user" class="label">City </label></td><td align="left" valign="top"><span class="userInfo">'+userCity+'</span></td></tr><tr><td align="left" valign="top"><label for="user" class="label">State </label></td><td align="left" valign="top"><span class="userInfo">'+userState+'</span></td></tr></table></div> <div class="group"><input type="button" class="button" value="Back" onclick="window.location='+homePageLink+'"/></div><div class="sign-up-htm"></div></div>';
+                
+                $('.login-form').html("");
+                $('.login-form').html(newhtm);  
+            }
+            $("#spinner_custom").hide();          
+        }
+        else if ( xmlhttp.status == 404 )
+        {
+            failCall(xmlhttp.status,"Error while retriving user information.Error Code: 404");
+        }
+        else if ( xmlhttp.status == 503 )
+        {
+            failCall(xmlhttp.status,"Error while retriving user information.Error Code: 503");
+        }
+        else if ( xmlhttp.status == 204 )
+        {
+            failCall(xmlhttp.status,"No data received.Error Code: 204");
+        }
+    }
+    xmlhttp.onerror=function()
+    {
+        failCall(xmlhttp.status,"Error while retriving user information");
+        //alert("failed");
+    }
+    xmlhttp.onabort=function()
+    {
+        failCall(xmlhttp.status,"Error while retriving user information.Connection Aborted.");
+    }
+    xmlhttp.open("POST", uri, true );
+    xmlhttp.setRequestHeader("Content-Type", "application/json");
+    //UAT--xmlhttp.setRequestHeader("Ocp-Apim-Subscription-Key", "6ffaf52bc1d74ee9b7d840dd17a9d588");
+    xmlhttp.setRequestHeader("Ocp-Apim-Subscription-Key", "223f900e901a4a61baedc803eef5153b");
+    xmlhttp.send(JSON.stringify({
+                "aadharNumber": aadharno,
+                "rdServiceData": pidVal,
+                "udc": udcVal,
+                "source": "MOBAPP"                    
+    }));
+    
+}
+
+function  eKYCBioInfoJquery(udcVal,pidVal){
+
+console.log(" im here in ekyc auth api-----------noor");
+
+
+    //$("#aadhar_loading").show(); error is here nooor...........................
+
+    var aadharno = $('#aadharno').val();
+    
+    //var   uri     = "https://bfl-api-dev.azure-api.net/BFLEKYCWS/getBIOKYC";
+    var uri     = "https://bflapiprod.azure-api.net/BFLEKYCWS/getBIOKYC";
+    
+    // Get all user values from response
+    //var userImgSrc = 'man.jpg';
+    var homePageLink = "'index.html'";
+    var userName = "N/A";
+    var userGender = "N/A";
+    var userDOB = "N/A";
+    var userEmailId = "N/A";
+    var userPhoneNo = "N/A";
+    var userAddress = "N/A";
+    var userCity = "N/A";
+    var userState = "N/A";  
+    
+    var userImgSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAQAAABpN6lAAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAHdElNRQfhCAoHFTUqSP2QAAAPaUlEQVR42u2de3TURZbHP9WPPIEEkvAUkhl2DrAgAlEiwdGEiJhkwAekAyKMOruy7jrC7qzuyrjuzu7IOHrG2Zk5O3Occc9geIQEsiJIBAcMCPKQh4SHoCjkAQRCAklIOo9O/2r/6F86/eukX0mTdDd++5yc/LpvVXd9f3Vv3XurflXwLb7FbQ3Rl1+2bnD4WCVJJjFcxBFHJBFEAmZaaaZW1uqqZLmurPWbxTdCioA/R0TN0KXLZO5ktJdFKjnJEVHSePDpliAmoMRQnaJLl+mkEtHxnpEoookkjDAM6DAA7Si000YbzTTRRHtnFc3sp0SUyEMma5ARsGmqdalYxLCOZicQTwwxRHpRtpl66qnhGpaOt66IfJlnOh4UBOSP1C9mKZMADMQzlKHE9uhrJDe4RjU1HX3ipMxT1i+6HMAEbBire4lnMIBgKImMwuCHWq1UUcZVFACFIuXfF54JQAI2TVVW8jg6iCWRMZ1q7ye0UEEZ9QCK2GRdtbA0gAjYNFn5BZkIGMYEEm6hza7mDNU2/fhA9/KC0wFAQF50+IviZcJgBBOI64ORu44zXARoF78Pe+WRm/1KQIFJvMUoGM5kYvrQparjBFcBLsoVuUX9REBRovVPzIZIpnBHPzixlZTSDLDd+uyiyj4noGCuWM0QwV8xEWM/+fHtfMlZFKgVT+V80IcEFIaJ1+UKRAwpfdrxu1eGQzSAFL+6vnKZpU8IKBxDPqmQyDS/jPO99xNOcg7gsH7h/PO3nIDCGXzAEAPJjAmgoLacY7RDDdmmz24pAQVZYiNRMcxgYIDF9Q0coAGaWGDa7ks5nS/CGxeLzUTFkRZwzYdBzCIeotla8Iwv5fQ+3P0XeBvDSO7rN6vvqSmJ3KRBJ+blmDfu9zsBhc+L3yKSSPGt0/QpBHfQwg3B7JybGw/41QYULuFdxDgmE/go5StQWGJa7zcCCh4U2whLZDrBgSNcAIt4JOdDvxBQOJ1dDBhJat9mUHsByQEugVnMztnfawLyk/RHiEvg+77YywBwjj6hBq5xt6miV8NgYZh+A3ExzAyq5oOemQyCBPLfNvaKAPE6KQZmBOjA5w5hpGKA1Nif90IFCrPZiphOIsGJCg6BFI/lvN8jAvJH6z8n7rskE7w4TBnc0E+dX94DFdC/TVwMUwhmTCMWBlv/2AMbUGAiU0dKkBm/rsbwHgQ8VDDfRxV4f2DrGUYFh+fnCcc5B5X8tanRhx7Q9jNGRTCBUMAkImG0/DcfesCGSbpjGGf0S6rzVqCSg9CuS15wwsseoHsD47CQaT6MZjgYlP/yUgUKp/Aw3EUo4U6AuZsme9cDXkGM7Pdsr38RywgQykovCNg0nsdgPKGGCQALCsd5JEBZiW5Yn8zx9S3iGAp6+S8eRoHCUZRheIChhB6q2QMWfeL8Knc94AkMsSHZfBhKDBiVJ9yrwBKCNvbzjERAPuWGgA3TuFME1IyPfzEGAZO0g6GGALEEhvt9cUvgIJJhgFzigoASg1gUygpgV4LFhfpuCaiZzjADI0OagFHoYYTu7m4JUDIgPsjjf8/5gXhAzuqWAJFOiA6A2sEQZHo3BPw5gntvFwKYWRzehYDoVCKNxIY8AYMxQlTjvR3X9jUuIk2S4OXkVzqpvKa5/lAdPLexlQpgDNnM7aZcMZGkk8ybmm96iaNsJQoAMyZ0/K9mueVXFHCaGwjimUAm04B0zQi+hWgvCRDEU4VMZ48TATIZ4r2uxMoO5miuAd7kLEuZiOAL3uUML3UppwCCSk7ZInS1eWWAVK8+IhnJHhZ0xidsJZelxNJEKe/xIluIRvCew3SNL6Y7nirEtK5G8C58yAH8iLXUOr23h9P8kgeIJ47v8yan+dhF6SwKHK7yyLE3H3Ywh3nstD81UEoxb5BNIjGMJJPf2XuWnkj7K8wHAmKAzmyvSsC6wYzyhYCR5PBrp/e2kuvQhwaTi6vZ6bmc56z6fznnmW3/pJKb3MndNPFVh3vOQkY4KEw4y3s5VMcAjFk7SENA+FgwevU4Q+ddbOEvmnfOOaXRJvO149MfDggnh032+29yML1bmMMAYI6995ztkpwTvXTWozCAiBirIUB+B6/NSIfx+DGrNWrQxACnAaeRVpd94BwXgCt8TadXorCXDASQyT7MADRqflc6GWSon8wjw/5q8pECUJI0RlBJFKoV9sWvfpTf8J/262gaGeTw+Q0GuhxVDOSwiRfJw+RQ5iDj1FxUHOM5RHqXWrchyFYtRk+NIETTAN/RjgLD8UkBbHiEvewiQ736Hic0kcQxxrqpM4vNnOAcf+/wXjEHyOoYlbCQhmA8xx1qjdK4tZE9VIJIQA7TEKCLlz5ZUhvC+DGv0jGiZLKG++0/sYUNLHHjV+gw8VNecFCbBo6zzm6IzTzNFUYwj9+T4uccZRigi9fagCH0gAD4Hln8Rv0/jfEs5yAttHKY55nI/W7LzmYDDzhcb2c6Q+wDWxz3sBtIJY3nKaKKdsxUstYPBIQDMk6rAtH0cBVIDitUFvX8hG28y8+AJLLJ8kCpcDK7O3hGU+Ih/sQCjPwNk9jGehowkMA0fqf+0nk98gTtjY7u+BU2b2sv93m/EqSRCId14i1IjPbrFtoRdD+mNBGGETPGLmSbMWLB4ERZE0b1HQUzAonOXrbZKcz1pf+WcRj2mu537AFhviwb1g53EW6unK2vsyFzNG5GF/I2TR3QjSHreVZA1QMI4HWvfYQOAtqwPZh4W8AKdPhotyUBSjcENIHltiGgXW2xox9QA223DQGtgLymIUBXi8vAJTQJ0NVqCFCugvebNVwhkx9gW3RVy3NqdNaBKrJsDzlT5SAH10mz/3XGVTLJtkvWkaa+MlnKatqBOo3XCPV2mTTSnD7zhBZAVmtjgXLpdUgp+ZQpRLGLR4AYZrKDxxwMzD71aULJfqYQxceqzxaOzv7XGfuYRgR/UesxIvg/NdVWQR51rMDoFPEZVJmeRINNABc0PUBcwOk+uoaZnZh4SM33GMjQZH7MbOdR9WtscsUea2xmJ4/zEDsc3OTBDCaWOKayvCN/2cWVHmx/DfKJAHNXAlq/AYuTe+kKldxkChNpwrYAdxAJdD7H/iVtag7nopOca5Rzk2kuJXUu8ko9hZl2kG3nNQQsvkElqua6h4VdZCGIYA7bVIf1QTbbtWsH2apjsYtsBOHM8dAHFHbxMIJo5rDV6bMGSvktKX4loB6g7MkGZ1f4hHcENLOXbMDALD5RnadkTqsGrIGDakqjhb1kAUZmscetk9XIXuYCglnsUyUFaaSRzuP8Mxd4zoUT2zMjWA9wShMZAnCU7BrGeSx+jPFq0iKWcRxiBhDOTD4kB4XdJKv62CkXwzg+414vaoxjHAdJBRTeUxt5ibX8gVe6dWjf65ERrAHE0S4EyN3i1WtID3NDzexmt30gM9CuEpDBKnIw8yH/qOqZs5wrAtoo4RONZKpq4FDpe45/cGkEfYekBlBKuhAwcH9jsyWyzkOldRxmrT1MbWYZDQwC7iCaE7TSrs441GvkWniWBhd3qZajrLFLmvm7LpLCr0+rXccC5oGHnKNBslo5ANUezNUepnOHw/CTwkdqdD6bjXzED9TOqZWLsct1xW7ucZBMIIXtmh73Bf/jRn18RzXAvqzWrjYAUSJnVbu1AmZ2agxSJBm8wwJAz32sRvKCfVx/TpPuyOAdMu13NM1Bj8exTJOuzOAdsu0yYcSTyt92KScpRqe53uMlAdcAShz7lx2FM9hvYJ4bg9KM1SkzY7ZneNpoIkpNszSjOKXEzIBAEkWLk7dhcHoSvYV2jHanrKNGW/2OpSJo1OR4vHOF2tmCFVI6dxlw6AEJh69daR9+yc0yuchuU1kd9y7MK7kIDxNbETjkqzR9wznr1xMTeAkrXOZo14wQkN7Oejx6bcGNcoB1jnvTaSOTNXCVlpBtfjPVgG5tdzlBAEzHOSGpCFkCKpDwufbBGafYVK4JZSUoB5ynlpwIMKzDUufBGwhWXKUeLKx3S8D8KrEezoQkAWcA8kxX3BIA8udYq6kJuebXcg2syhtdY0onmL4WRdhX8IQOvgAoWPiVRwLAugpZRV1INf8GV0Aqv+guq9AFC0vZBidCioATAJsXnvKKAND9K5arVIZM88uphjblp93nlbrBgtP8NxwPkckyCycB+avu96J1MT0e+R+Ut9gMR9DjFM1Q0fpa95+6IGCuWf4EzoWAKazjG0AuX9rkEwGQW0Sx5BDWoG5+O4eQsCN3sysJd3uILKOmgWNBTcAxGuA6z7qWcEPA/Ivyh8gyyoK2+RcoB8nT7naTcrtGKLdYvgWf0xCUzW/gc0C+btriTsrDIqm6lznYzoEgXDzRxn6ssG/oq+7lPKbcixKtR4iP5/4g20xtD7VQrU+ef9G9pMdlcvPLlSwaazjg8FRHoENyiFq4SZan5nu1TnDhYfEorVUcDhoCjnIJLDLHdNSzrFcLJXN2iR+hlFMaFM0/zgVQxNLcHd5Ie6nYG0+aasiupUnz/E4gdv6jfAOIf8p5x7sSXlu2jYdN15lTL+oYFbDra63spxKkfMn0lrdlfLqdhU+wGuMQ7utm5iYQBr5PqYE2+VRuvvelfN1ae44oInoQM3xcltQXbs9+bsJN+XjuTl/K+b65+nS2EW9gKkkB1PwyjmGFarK8sfy9IgDyR+vzmRlI2+sf5zzAZ9bcRT4HLj1w74oaHlwTFcmMenGZ+H7fcaSOvVwByS8Tnpx73ffyPT9i40GxlmH9e8SGhdN8jYQa+cPc4p7V0YtBPX+0/o88DJHc5fUxcv5EBaW2mextLDNd6mktvT1mZ774NaNhKHf16eYLNyi1LXYplytcZ3v6gADYGmV+yXbQ0jAm9skmbDWcpQrAIv7Q7wct2bBporKKuQgYyoRbug/JVc7Y7rzkfWWlPw5d899ha5OVleSggxiSbsFha81UUG5b5moVhdZV3c3y9CsBAEXfVZbLZYSDII5ExvjxuL0rtnyEhQ28ZvrSf7/Z76Fd0QiriRxm2pyMeOKIJ6FH4ZOkjqvUUNMxQ/WFzDPkaXcDDEACOhTCulQ8wQjblZF49chNb/YoMKtHbtZ0Ts1dFutlnunkrfiltzC4L9Qr9+jT5SxSO9utJ5poIgnvcuhqq/3QVasjF5/ysa5EORJ0h646oji88V6ZLpKZ5HX8dIFT8hgfi4OmW56O7tP0ztpBEWOVJJkkRog4GUc0RgYAjVhoErWyVlyW5VxoO/9kcE5EfItvEYz4f3sFi6OXVbqQAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE3LTA4LTEwVDA3OjIxOjUzKzAwOjAwInJ3FwAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNy0wOC0xMFQwNzoyMTo1MyswMDowMFMvz6sAAAAASUVORK5CYII=';
+    
+    var image = new Image();
+    var theObject = {"aadharNumber": aadharno,"rdServiceData":pidVal,"udc":udcVal,"source":"MOBAPP"};
+    
+    $.ajax({    
+    url: uri,
+    data: JSON.stringify(theObject),
+    type: "POST",
+    dataType : "json",
+    beforeSend: function(xhr){
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Ocp-Apim-Subscription-Key", "223f900e901a4a61baedc803eef5153b");
+    },
+    timeout: 60000,//timeout as one minute
+    success: function(response) {       
+            var JsonArr = response;//JSON.parse(response);
+            
+            if(typeof(JsonArr.statusType.message) != "undefined" && JsonArr.statusType.message!== null){
+                if(JsonArr.statusType.message=="Failure"){
+                    failCall("","Failed to get user information.Error Code from server: "+JsonArr.statusType.code);
+                }
+            }else{
+                failCall("","Unable get user information.Error Code from server: "+JsonArr.statusType.code);
+            }           
+            if(typeof(JsonArr.customer_InfoType) != "undefined" && JsonArr.customer_InfoType!== null){
+                if(typeof(JsonArr.customer_InfoType.name.firstName) != "undefined" && JsonArr.customer_InfoType.name.firstName !== null){
+                    userName = JsonArr.customer_InfoType.name.firstName;
+                }
+                if(typeof(JsonArr.customer_InfoType.name.lastName) != "undefined" && JsonArr.customer_InfoType.name.lastName !== null ){
+                    userName += " "+JsonArr.customer_InfoType.name.lastName;
+                }
+                if(typeof(JsonArr.customer_InfoType.gender) != "undefined" && JsonArr.customer_InfoType.gender !== null ){
+                    userGender = JsonArr.customer_InfoType.gender;
+                }
+                if(typeof(JsonArr.customer_InfoType.dob) != "undefined" && JsonArr.customer_InfoType.dob !== null ){
+                    userDOB = JsonArr.customer_InfoType.dob;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.email) != "undefined" && JsonArr.customer_InfoType.address.email !== null ){
+                    userEmailId = JsonArr.customer_InfoType.address.email;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.phone) != "undefined" && JsonArr.customer_InfoType.address.phone !== null ){
+                    userPhoneNo = JsonArr.customer_InfoType.address.phone;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.loc) != "undefined" && JsonArr.customer_InfoType.address.loc !== null ){
+                    userAddress = JsonArr.customer_InfoType.address.loc;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.streetAddress) != "undefined" && JsonArr.customer_InfoType.address.streetAddress !== null ){
+                    userAddress += " "+JsonArr.customer_InfoType.address.streetAddress;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.city) != "undefined" && JsonArr.customer_InfoType.address.city !== null ){
+                    userAddress += " "+JsonArr.customer_InfoType.address.city;
+                    userCity = JsonArr.customer_InfoType.address.city;
+                }
+                if(typeof(JsonArr.customer_InfoType.address.state) != "undefined" && JsonArr.customer_InfoType.address.state !== null ){
+                    userAddress += " "+JsonArr.customer_InfoType.address.state;
+                    userState = JsonArr.customer_InfoType.address.state;
+                }
+                if(typeof(JsonArr.customer_InfoType.image.value) != "undefined" && JsonArr.customer_InfoType.image.value !== null ){            
+                    userImgSrc = 'data:image/'+JsonArr.customer_InfoType.image.type+';base64,'+JsonArr.customer_InfoType.image.value;
+                }
+                
+                //set customized value on the basis of common response
+                $('.login-wrap').height('690px');
+                $('.login-html').height('670px');
+                
+               var newhtm = '<div class=/"sign-in-htm/"> <div class=/"group/"></div> <div class=/"group/"><table border=\"0"\ width=\"90%\" cellpadding=\"5\" cellspacing=\"3\" align=\"center\"><tr><td colspan=\"2\" align=\"center\" ><div class=\"profile_pic-wrap\"><img src=\"'+userImgSrc+'\" alt=\"\" /></div></td></tr> <tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">Name </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userName+'</span></td></tr><tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">Gender </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userGender+'</span></td></tr><tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">DOB </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userDOB+'</span></td></tr><tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">Email Id </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userEmailId+'</span></td></tr><tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">Phone No. </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userPhoneNo+'</span></td></tr><tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">Address </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userAddress+'</span></td></tr><tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">City </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userCity+'</span></td></tr><tr><td align=\"left\" valign=\"top\"><label for=\"user\" class=\"label\">State </label></td><td align=\"left\" valign=\"top\"><span class=\"userInfo\">'+userState+'</span></td></tr></table></div> <div class=\"group\"> <input type=\"button\" class=\"button\" value=\"Back\" onclick=\"window.location='+homePageLink+'\"/></div><div class=\"sign-up-htm\"></div></div>';
+
+                $('.login-form').html("");
+                $('.login-form').html(newhtm);  
+            }
+            $("#aadhar_loading").hide();
+    },
+    error: function(xmlhttprequest, textstatus, message) {
+        if(textstatus === "timeout") {
+            failCall(xmlhttprequest.status,"Error while retriving user information.Session Timeout");
+        }
+        else if ( xmlhttprequest.status == 404 )
+        {
+            failCall(xmlhttprequest.status,"Error while retriving user information.Error Code: 404");
+        }
+        else if ( xmlhttprequest.status == 503 )
+        {
+            failCall(xmlhttprequest.status,"Error while retriving user information.Error Code: 503");
+        }
+        else if ( xmlhttprequest.status == 204 )
+        {
+            failCall(xmlhttprequest.status,"No data received.Error Code: 204");
+        }else{
+            failCall(xmlhttprequest.status,"Error while retriving user information");
+        }   
+        console.log( "Error: " + message );
+        console.log( "Status: " + textstatus );
+        console.dir( xmlhttprequest );  
+    }
+    });
+}
+</script>
+<style>
+
+.ekHeader {
+    background-image: url(./imgs/whitebg.jpg);
+    background-repeat: repeat-x; 
+    background-color:#DFDFFF;
+    height:65px;
+}   
+.ekHeader a img{
+    float:left;
+    margin-top:15px;
+ }
+.navbar-text {
+    float:left;
+    font-size:23px; 
+    margin-left:50px; 
+    width:300px;
+    color:#6D6D36;
+} 
+
+// Error info
+
+.isa_info, .isa_success, .isa_warning, .isa_error {
+margin: 10px 0px;
+padding:12px; 
+}
+.isa_info {
+    color: #00529B;
+    background-color: #BDE5F8;
+    height:30px;
+    padding-top:5px;
+}
+.isa_success {
+    color: #FFFFFF;
+    background-color: #057413;
+    height:30px;
+    padding-top:5px;
+}
+.isa_warning {
+    color: #FFFFFF;
+    background-color: #F84E05;
+    height:30px;
+    padding-top:5px;
+}
+.isa_error {
+    color: #FFFFFF;
+    background-color: #FF0404;
+    height:30px;
+    padding-top:5px;
+}
+.isa_info i, .isa_success i, .isa_warning i, .isa_error i {
+    margin:10px 22px;
+    font-size:2em;
+    vertical-align:middle;
+    height:30px;
+    padding-top:5px;
+}
+
+.errDiv {
+    position:absolute;
+    left:32%;
+    top:7%; 
+    z-index:1000px;
+    width:35%;
+    align:center; 
+    text-align:center;
+    display:none;
+}
+.errDiv div{ 
+    font-size:13px;
+}
+</style>
+</head>
+
+    
+    <body>
+        <apex:slds />
+       <apex:form style="background-color: white;">
+             
+            
+            <!-- <div class="group"><label for="user" class="label">Name </label> <span class="userInfo">Rajendra Mahajan</span>    </div>-->
+            <div id="aadhar_loading" class="cssload-wrap" style="display:none">
+                <div class="cssload-bg">
+                    <div class="cssload-loading">
+                        <span class="">Please Wait...</span><br/>
+                        <span class="cssload-title">Facing slow response from Aadhaar Server</span><br/>
+                        <span class="cssload-title">It might take approximately 60 seconds</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a class="navbar-brand" href="" style="display:none;">
+                    <img alt="Atos" src="https://onlinedm.bajajfinserv.in/_layouts/Bajajproject/ekyc/imgs/atos_logo.png" width="100"/>
+                </a>
+                
+                
+            </div>  
+            
+            <div class="errDiv">
+                <!--<div class="isa_info">Replace this text with your own INFO text.</div>
+<div class="isa_success">Replace this text with your own SUCCESS text.</div>
+<div class="isa_warning">Replace this text with your own WARNING text.</div>-->
+                <div class="isa_error">Replace this text with your own ERROR text.</div>
+                <!---->
+            </div>
+         
+                <div id="AadhaarDetails" class="container" style="display:none">
+                    <div id="imageAadhaar" style="width:30%; float:left;">
+                        <p id="image"></p>
+                    </div>
+                    <div id="detailsAadhaar" styel="margin-left:15%;">
+                        <p id="name" style="margin:0"></p>
+                        <p id="dob" style="margin:0"></p>
+                        <p id="address" style="margin:0"></p>
+                        <p id="zipcode" style="margin:0"></p>
+                        <p id="zipcode" style="margin:0"></p>
+                       <!-- <input type="checkbox" name="POA" value="{!isPOABio}"/>POA<br/>-->
+                    </div>
+                    <br/>
+                    <!--Rohit - not needed for HTS-->
+                    <!--<div>
+                        <input type="checkbox" name="isPOA" id="isPOA" value="false"> POA </input>
+                    </div>-->
+                    <div>
+                        <input type="button" class="slds-button_neutral" value="Reinitiate" onclick="BacktoMain()"/> 
+                        <input type="button" class="slds-button_neutral" value="Confirm" onclick="confirm()"/> 
+                    </div>
+                </div>
+               
+                    <div id="userDetails" >
+                     <div class="slds-form-element" >
+                        <label class="slds-form-element__label" style="margin-left: 10px;" ><b>Aadhaar No</b></label>
+                        
+                        <input style="width:25%;margin-left: 10px;" id="aadharno" type="text" placeholder="Enter Aadhaar Number" value="" class="slds-input" maxlength="12"/>
+                        
+                    </div>
+                    <br/>
+                   
+                    <div id="error" class="group"> 
+                        <label for="pass" class="slds-form-element__label" style="margin-left: 10px;">Place thumb on device and Click the scan button.</label>
+                    </div>
+                    <br/>
+                    <input type="button" class="slds-button_brand" id="ScanBtn" value="Click to Scan" onclick="captureFP()" style="margin-left: 10px;"/>
+                    
+                        <br/>
+                        <div class="sign-up-htm" style="display:none"/> 
+                    <input type="hidden" id="rdStatusVal" value=""/>
+                    <input type="hidden" id="rdInfoVal" value=""/>
+                    <input type="hidden" id="rdPortVal" value=""/>
+                    <input type="hidden" id="rdPid" value=""/>
+                    <textarea id="resValue" rows="5" cols="100" style="display:none"></textarea>
+                           
+            </div>
+         
+            
+            <div class="spinner_custom" id="spinner_custom" style="display:none"></div>            
+                                           
+        </apex:form>
+            
+            
+            
+            
+            
+ <script src="https://code.jquery.com/jquery-3.3.1.min.js" ></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" ></script>
+  <apex:includeScript value="{!URLFOR($Resource.shaCalc)}"/>
+<script>
+$(document).ready(function() {
+            /*$("#aadharno").keydown(function (e) {
+                // Allow: backspace, delete, tab, escape, enter and .
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                     // Allow: Ctrl+A, Command+A
+                    (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || 
+                     // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                         // let it happen, don't do anything
+                         return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });*/
+
+            $('#checkbox-value').text($('#isPOA').val());
+
+            $("#isPOA").on('change', function() {
+              if ($(this).is(':checked')) {
+                $(this).attr('value', 'true');
+              } else {
+                $(this).attr('value', 'false');
+              }
+              
+              $('#checkbox-value').text($('#isPOA').val());
+              //alert(document.getElementById("isPOA").value);
+            });
+            
+            $("#dealid").keydown(function (e) {
+                // Allow: backspace, delete, tab, escape and enter
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) !== -1 ||
+                     // Allow: Ctrl+A, Command+A
+                    (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || 
+                     // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40) ||
+                    // Allow: shift key
+                    (e.keyCode === 16)) {
+                         // let it happen, don't do anything
+                         return;
+                }
+                //The first charaters should be S and F
+                var str = $("#dealid").val();
+                if(str.length > 1){
+                    // Ensure that it is a number and stop the keypress
+                    if ((e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) { 
+                        e.preventDefault();
+                    }
+                }
+                else 
+                {
+                    if(str.length==0 && String.fromCharCode(83) === e.key){
+                        return;
+                    }
+                    else if(str.length==1 && String.fromCharCode(70) === e.key){
+                        return;
+                    }else{
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+         function Customer(){
+          /* Note the field names are case-sensitive! */
+          this.Id = null; 
+          this.Name = null;
+          this.eKYC_Counter__c = null; 
+             this.eKYC_Consent__c = null; 
+             this.eKYC_Consent_On__c = null; 
+           
+      }
+       
+        var finalUrl="";
+        var MethodInfo="";
+        var MethodCapture="";
+        var finalport="";       
+        var prevCounter=0;
+        var customerOBJ;
+        // get Customer Details
+    Visualforce.remoting.Manager.invokeAction(
+        '{!$RemoteAction.eKYCBioController.getEKYCdataFromCustomer}',
+        parentObj= '{!parentObj}',
+        parentId= '{!parentId}',
+        function(result, event){
+            customerOBJ=result;
+            console.log('customer captureFP ');          
+            
+            /*if(customerOBJ.eKYC_Counter__c != null && customerOBJ.eKYC_Counter__c != '')
+            {
+                prevCounter=customerOBJ.eKYC_Counter__c;
+            }
+            if(customerOBJ.eKYC_Counter__c > 3)
+            {
+                alert('eKYC API has been used more than five times');
+            }*/
+             
+        }, 
+            {escape: true}
+        );  
+        // For display or error/info/warning/success message.
+        function msgDisplay(){
+        
+        
+        }
+
+        // For tesing the refresh parent page
+        function refreshparrent(){
+            //window.opener.location.href = window.opener.location.href.replace(/#.*$/,''); 
+            top.location.reload(true);
+            //window.opener.location.reload();
+        }
+        
+        // string response, string mode, boolean isPOI, boolean isPOA, string userAction, string customerId
+        var responseForRemote="";
+        function confirm(){
+            
+            var prevCounter=0;           
+            var response='';
+                var mode, isPOI, isPOA, userAction, customerId;
+            //   var customer={"SObjectType": "Customer__c"};
+           var  eKYCConsent,eKYCConsentOn,eKYCCounter,eKYCStatus;
+           //isPOA =  document.getElementById("isPOA").value;
+           //alert(isPOA);
+           //var CounterlabelValue = System.Label.AadhaarKYCCounter;
+           //alert('CounterlabelValue=='+CounterlabelValue);
+           if(prevCounter  < 3)
+            {
+                prevCounter=prevCounter+1;
+                response = responseForRemote;                 
+                var parentId='{!parentId}'; 
+                var parentObj = '{!parentObj}';
+                eKYCConsent='Yes';
+                eKYCConsentOn=new Date().toUTCString(); 
+                eKYCCounter=prevCounter;
+                eKYCStatus='Completed';
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.eKYCBioController.insertIntegrationResponseForBIO}',
+                    response,                     
+                    parentId,  
+                    parentObj,                
+                    eKYCConsentOn,
+                    '{!ekycId}',                    
+                    function(result, event){
+                       
+                        if(result == 'Success')
+                        {
+                              
+                             window.location.href = window.location.href.replace(/#.*$/,'');  
+                             location.reload(true);
+                             window.opener.location.reload();
+                            top.location.reload(true);
+                            
+                            
+                        }
+                        else
+                        {
+                            console.log('rohit '+response);
+                            alert('Ekyc Response recieved Successfully , Please close the window');
+                        }
+
+                    }, 
+                    {escape: true}
+                );  
+            }
+            else {
+                alert('eKYC API can not be used more than the specified limit.');
+            }
+           
+        }
+
+        //captureFP  
+        function captureFP() {
+        
+            $('#rdStatusVal').val("");
+            $('#rdInfoVal').val("");
+            $('#rdPortVal').val("");            
+            console.log("============= captureFP ======================");
+
+            //This validation helps when user copy paste(with rigth click) the contents in the box
+            var aadharNo = $('#aadharno').val();
+            var aadharNoFlag = true;
+                      
+            
+            //This validation helps when user copy paste(with rigth click) the contents in the box
+            
+            var dealID = $('#dealid').val();
+            
+            var dealIDFlag = true;
+            
+
+            if(dealIDFlag === false){
+                failCall("No_Reload","Please ensure for Deal Id\nTotal length is 10 characters\nFirst character is letter S\nSecond character is letter F\nRest all character are numbers");
+                return false;
+            }
+                console.log("============= noor test ======================" + $('#aadharno').val());
+        
+
+        if($('#aadharno').val().length==12) {
+        
+                console.log("============= noor test ===================success===" + $('#aadharno').val());
+        
+                var returnVal = false;              
+                if(validate($('#aadharno').val())){
+                    //failCall("No_Reload","Aadhaar Number is valid");
+                    returnVal = true;
+                    
+            
+                    
+                }else{
+                    failCall("No_Reload","Invalid Aadhaar Number");
+                    $( "#aadharno" ).focus();
+                    returnVal = false;
+                }
+                if(returnVal == true){
+                    alert("============= B4 discoverRDService ======================");
+                   
+                    discoverRDService();
+                    
+                    
+                    
+                    console.log("============= processInfo ======================");
+                    processInfo();
+                }
+            } else {
+                failCall("","Please enter valid 12-digit Aadhaar Card Number.");
+                $( "#aadharno" ).focus();
+            }   
+        }   
+        
+        function processInfo() {
+                var rdStatus = $('#rdStatusVal').val();
+                var rdInfo = $('#rdInfoVal').val();
+                var rdPort = $('#rdPortVal').val(); 
+                rdInfoValue = rdInfo.split(' ')[0];
+                 
+                if(rdStatus=='READY' && rdPort>=11100 && rdPort<=11120){
+                 var funDriverInfo = rdInfoValue+'DriverInfo()';
+                 var funCaptureInfo = rdInfoValue+'Capture()';
+                 
+                console.log("============= ProcessInfo ======================");
+                 
+                  //eval(funDriverInfo);              // To Get  DriverInfo
+                  eval(funCaptureInfo);              // To Get  Capture Info - PId block
+           
+                } else {
+                    failCall("","Device is NOT READY. Please connect the device or check respective service.");
+                }
+        }
+        
+        function processPidBlock(pidBlockInfoVal){
+         //alert("Yes:"+pidBlockInfoVal);
+         var uidVal = $('#aadharno').val();
+         var udcVal = geteKYCAuthInputValues(pidBlockInfoVal);
+         console.log("============= processEKYCAuthAPI =========  noor =============");
+            //alert('counter=='+ekycCounter);
+
+         console.log('udcValue:'+udcVal+"----uidVal:"+uidVal+"-----pidBlockInfoVal:"+pidBlockInfoVal);        
+        
+        Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.eKYCBioController.GetBIOKYC}',
+            uidVal, 
+            udcVal,
+            pidBlockInfoVal,
+            '{!parentId}',
+            '{!parentObj}',
+            function(result, event){
+                console.log('---------------- ' + result);
+                if (result != null && event.status) {
+                    // Get DOM IDs for HTML and Visualforce elements like this
+                    // Get DOM IDs for HTML and Visualforce elements like this
+                document.getElementById("resValue").innerHTML += result;
+                   
+                    
+                    var text = $('<textarea/>').html(result).text();
+                    
+                    responseForRemote=text;
+                    var resp;
+                   
+                    if(text != undefined && text!= null)
+                    {
+                        resp=JSON.parse(text);
+                        console.log('resp');
+                        console.log(resp);
+                    }
+                    if(text=='false'){ 
+                        alert('Ekyc limit exceeds');
+                    }
+                    else if(resp["statusType"].message == 'Failure' )
+                    {
+                        // window.parent.location = '/' + customerOBJ.Id;
+                        window.location.href = window.location.href.replace(/#.*$/,'');
+                        alert(resp["statusType"].errorDesc);
+                    }
+                 else{
+                    var x;
+                    //if(resp["statusType"].errorDesc == "null"){
+
+                        x =  "<b>Name: </b>" +resp["customerInfoType"].name;
+                        document.getElementById("name").innerHTML = x;
+                        
+                        x = "<b>DOB: </b>" +resp["customerInfoType"].dob;
+                        document.getElementById("dob").innerHTML = x;
+                        
+                        x =  "<b>Address: </b>" +resp["customerInfoType"].address.house + ", " +
+                        resp["customerInfoType"].address.loc + ", " +
+                        resp["customerInfoType"].address.streetAddress + " " +
+                        resp["customerInfoType"].address.city + ". " +
+                        resp["customerInfoType"].address.dist + ". " +
+                        resp["customerInfoType"].address.state + ". " +
+                        resp["customerInfoType"].address.country + ".";
+                        document.getElementById("address").innerHTML = x;
+
+                        x =  "<b>Pincode: </b>" +resp["customerInfoType"].address.zipCode;
+                        document.getElementById("zipcode").innerHTML = x;
+
+                        document.getElementById("error").innerHTML = '<label for="pass" class="slds-form-element__label" style="margin-left:10px;">Place thumb on device and Click the scan button.</label>';
+                            
+                        x = "<img width='80%' src='data:image/png;base64,"+resp["customerInfoType"].image.value+"' />";
+                        document.getElementById("image").innerHTML = x;
+                        
+                        x = document.getElementById("userDetails");
+                        x.style.display = "none";
+    
+                        x = document.getElementById("AadhaarDetails");
+                        x.style.display = "block";
+                     }
+                    
+                    /*} else {
+
+                        document.getElementById("error").innerHTML = "<p style='color:Red;'><b>Error </b>" + resp["statusType"].errorDesc +" Please try again.</p>";
+                    }*/
+                    
+                        
+                    } else if(result  == null){
+                        alert("Error while captureing the data, Please try once again.");
+                    } 
+                    else if (event.type === 'exception') {
+                        document.getElementById("resValue").innerHTML = 
+                            event.message + "<br/>\n<pre>" + event.where + "</pre>";
+                    } else {
+                        document.getElementById("resValue").innerHTML = event.message;
+                    } 
+            }, 
+            {escape: true}
+        );
+        
+        //processEKYCAuthAPI(uidVal,udcVal,pidBlockInfoVal);
+        
+        
+        
+        
+        
+        }
+        
+        function BacktoMain(){
+            
+            x = document.getElementById("userDetails");
+                        x.style.display = "block";
+            x = document.getElementById("AadhaarDetails");
+                        x.style.display = "none";
+        }
+        
+        // To discover Port     
+        function discoverFirstNode(PortNo)
+        {           
+            //alert(PortNo);
+        
+            var primaryUrl = "https://127.0.0.1:";
+            url = "";
+            var verb = "RDSERVICE";
+            var err = "";
+            var res;
+            $.support.cors = true;
+            var httpStaus = false;
+            var jsonstr="";
+            var data = new Object();
+            var obj = new Object();
+                
+            $.ajax({
+                type: "RDSERVICE",
+                async: false,
+                crossDomain: true,
+                url: primaryUrl + PortNo,
+                contentType: "text/xml; charset=utf-8",
+                processData: false,
+                timeout: 60000,
+                cache: false,
+                async:false,
+                crossDomain:true,
+                success: function (data) {
+                    var xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data);
+                    //alert(xmlstr);
+                    data = xmlstr;
+                    //alert(data);
+                    httpStaus = true;
+                    res = { httpStaus: httpStaus, data: data };
+                    //alert(data);      
+                    $('#txtRDSInfo').val(data);
+                    SucessInfo(data);        
+                    var $doc = $.parseXML(data);
+                            
+                    //alert($($doc).find('Interface').eq(1).attr('path'));
+                    
+                    //MethodInfo=$($doc).find('Interface').eq(0).attr('path');
+                    //MethodCapture=$($doc).find('Interface').eq(1).attr('path');
+                    for(var j=0;j<2;j++)
+                    {
+                        if($($doc).find('Interface').eq(j).attr('id') == 'CAPTURE')
+                        {
+                            MethodCapture=$($doc).find('Interface').eq(j).attr('path');
+                        }else if($($doc).find('Interface').eq(j).attr('id') == 'DEVICEINFO')
+                        {
+                            MethodInfo=$($doc).find('Interface').eq(j).attr('path');
+                        }
+                    }        
+                    console.log("RDSERVICE Discover Successfully");
+                },
+                error: function (jqXHR, ajaxOptions, thrownError) {
+                    $('#txtRDSInfo').val("");
+                    failCall("","Error while discovering RD service ON port.Error info : "+thrownError);
+                    res = { httpStaus: httpStaus, err: getHttpError(jqXHR) };
+                },
+            });
+                
+            return res; 
+                            
+        }       
+        
+        function discoverRDService()
+        {
+            var primaryUrl = "https://127.0.0.1:";
+            url = "";
+            $("#ddlRDS").empty();
+            
+            
+            alert("=========================discover rd -- noor");
+            
+            //alert("Please wait while discovering port from 11100 to 11120.\nThis will take some time.");
+            
+            
+            console.log("============Place your finger on the scanner.Press Ok to continue=============discover rd -- noor");
+            //failCall("No_Reload","Place your finger on the scanner.Press Ok to continue");
+            
+            
+            $("#spinner_custom").show();
+            
+            
+            
+            var totalPortParse = 0;
+            var maxPortsToParse = 11120 - 11100;
+            
+            
+            
+            
+            for (var i = 11100; i <= 11120; i++)
+            {
+                <!-- $("#lblStatus").text("Discovering RD service on port : "); -->
+                <!-- $("#lblStatus").text("Discovering RD service on port : " + i.toString()); -->
+               
+               
+               
+               
+               
+                var verb = "RDSERVICE";
+                var err = "";
+            
+                var res;
+                $.support.cors = true;
+                var httpStaus = false;
+                var jsonstr="";
+                var data = new Object();
+                var obj = new Object();
+                var xmlstr;
+                
+                $.ajax({
+                    type: "RDSERVICE",
+                    crossDomain: true,
+                    url: primaryUrl + i.toString(),
+                    contentType: "text/xml; charset=utf-8",
+                    processData: false,
+                    timeout: 60000,
+                    cache: false,
+                    async:false,
+                    
+                    success: function (data) {
+                        xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data);
+                        //alert(xmlstr);
+                        data = xmlstr;
+                            
+                        httpStaus = true;
+                        res = { httpStaus: httpStaus, data: data };
+                        //alert(data);      
+                        finalUrl = primaryUrl + i.toString();
+                        var $doc = $.parseXML(data);
+                        var CmbData1 =  $($doc).find('RDService').attr('status');
+                        var CmbData2 =  $($doc).find('RDService').attr('info');
+                            
+                        $("#ddlRDS").append('<option value='+i.toString()+'>(' + CmbData1 +')'+CmbData2+'</option>');
+                        
+                        SucessInfo(CmbData1+':'+CmbData2+':'+i.toString());
+                        $('#rdStatusVal').val(CmbData1);
+                        $('#rdInfoVal').val(CmbData2);
+                        $('#rdPortVal').val(i.toString());
+                    },
+                    error: function (jqXHR, ajaxOptions, thrownError) {
+                        ///alert('From Error :'+thrownError);
+                        totalPortParse++;
+                        data = "error";
+                        //res = { httpStaus: httpStaus, err: getHttpError(jqXHR) };
+                    },
+                    statusCode:{
+                        501: function(){
+                            
+                        }
+                    }
+                });
+                
+                
+                if(xmlstr != null)
+                {
+                    if(xmlstr.indexOf('Precision') > 0 || xmlstr.indexOf('SecuGen') > 0)
+                    {
+                        finalport=i.toString();
+                        discoverFirstNode(i);//This code is called for precision device
+                                             //it will get the url for device capture and device info
+                        break;
+                    }
+                }
+                
+                if(data != "error")
+                {
+                    break;
+                }
+
+            }
+            console.log('totalPortParse:'+totalPortParse+'maxPortsToParse:'+maxPortsToParse);
+            if((totalPortParse+1)==maxPortsToParse){
+                failCall("No_Reload","Error while discovering RD service ON port");
+            }
+            
+            return res;                         
+        }
+        
+        //----------------- End of discover port ----------------//
+        
+
+    var params = "";
+
+    function SecuGenCapture() 
+        {
+        
+        var uri     = finalUrl+MethodCapture;
+         
+        // params  += "&PidXML=" + encodeURIComponent(enc_pid_b64);
+        var ver = '2.1';
+        var ra = 'F';
+        var rc = 'Y';
+        var lr = 'Y';
+        var de = '';
+        var pfr = 'Y';
+        wadh = 'rhVuL7SnJi2W2UmsyukVqY7c93JWyL9O/kVKgdNMfv8=';//SHA256(ver+ra+rc+lr+de+pfr);
+        params = '<PidOptions ver="1.0"> <Opts fCount="1"  format="0" pidVer="2.0" timeout="20000" env="P" posh="LEFT_INDEX" wadh="'+wadh+'"/>';
+        params += '</PidOptions>';
+        var xmlhttp = new XMLHttpRequest();     
+        xmlhttp.onreadystatechange=function()
+        {
+            $("#spinner_custom").hide();
+            if (xmlhttp.readyState==4 && xmlhttp.status==200)
+            {
+                console.log("---secugen--");
+                console.log(xmlhttp.responseText);
+                if(xmlhttp.responseText.indexOf("Capture timeout")===-1){
+                    processPidBlock(xmlhttp.responseText);
+                    SucessInfo(xmlhttp.responseText,'pidBlockInfoVal');
+                }else{
+                    failCall("No_Reload","Fingerprint Capture Timed-out.Ensure that the finger is correctly placed on the scanner and try again");
+                }
+            }
+            else if ( xmlhttp.status == 404 )
+            {
+                failCall(xmlhttp.status,"Error while requesting localserver : SecuGenCapture : 404");
+            }
+            else if ( xmlhttp.status == 503 )
+            {
+                failCall(xmlhttp.status,"Error while requesting localserver : SecuGenCapture : 503");
+            }
+        }
+        xmlhttp.onerror=function()
+        {
+            failCall(xmlhttp.status,"Error while requesting localserver : SecuGenCapture");
+        }
+        xmlhttp.onabort=function()
+        {
+            failCall(xmlhttp.status,"Operation aborted for localserver : SecuGenCapture");
+        }
+        xmlhttp.open("CAPTURE", uri, true );
+        //xmlhttp.send(encodeURIComponent(params));
+        xmlhttp.send(params);
+    }
+    function SecuGenDriverInfo( ) 
+    {
+        var uri     = finalUrl+MethodInfo;
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange=function()
+        {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200)
+            {
+                SucessInfo( xmlhttp.responseText);
+            }
+            else if ( xmlhttp.status == 404 )
+            {
+                failCall(xmlhttp.status,"Error while requesting localserver : SecuGenDriverInfo : 404");
+            }
+            else if ( xmlhttp.status == 503 )
+            {
+                failCall(xmlhttp.status,"Error while requesting localserver : SecuGenDriverInfo : 503");
+            }
+        }
+        xmlhttp.onerror=function()
+        {
+            failCall(xmlhttp.status,"Error while requesting localserver : SecuGenDriverInfo");
+        }
+        xmlhttp.onabort=function()
+        {
+            failCall(xmlhttp.status,"Operation aborted for localserver : SecuGenDriverInfo");
+        }
+        xmlhttp.open("DEVICEINFO", uri, true );
+        xmlhttp.send();
+    }
+    
+    function PrecisionDriverInfo( ) 
+    {
+        var uri     = finalUrl+MethodInfo;
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange=function()
+        {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200)
+            {
+                SucessInfo( xmlhttp.responseText);
+            }
+            else if ( xmlhttp.status == 404 )
+            {
+                failCall(xmlhttp.status,"Error while requesting localserver : PrecisionDriverInfo : 404");
+            }
+            else if ( xmlhttp.status == 503 )
+            {
+                failCall(xmlhttp.status,"Error while requesting localserver : PrecisionDriverInfo : 503");
+            }
+        }
+        xmlhttp.onerror=function()
+        {
+            failCall(xmlhttp.status,"Error while requesting localserver : PrecisionDriverInfo");
+        }
+        xmlhttp.onabort=function()
+        {
+            failCall(xmlhttp.status,"Operation aborted for localserver : PrecisionDriverInfo");
+        }
+        xmlhttp.open("DEVICEINFO", uri, true );
+        xmlhttp.send();
+    }
+    
+    // Precision capture
+        function PrecisionCapture()                     // Get Capture Info from the path given by RDService Info
+        {
+            
+        // Form input Pid OPtions for capture Input
+            //
+            var wadh = 'rhVuL7SnJi2W2UmsyukVqY7c93JWyL9O/kVKgdNMfv8=';//SHA256(ver+ra+rc+lr+de+pfr);
+            var XML= '<PidOptions ver="1.0"> <Opts fCount="1"  format="0" pidVer="2.0" timeout="20000" env="P" posh="LEFT_INDEX" wadh="'+wadh+'"/>';
+            XML += '</PidOptions>';
+            //--original--var XML='<PidOptions ver="1.0"><Opts fCount="1" fType="0" format="0" pidVer="2.0" timeout="20000" env="P" /></PidOptions>';
+            
+            var verb = "CAPTURE";
+            var err = "";
+            var res;
+            $.support.cors = true;
+            var httpStaus = false;
+            var jsonstr="";
+            $.ajax({
+                type: "CAPTURE",
+                async: false,
+                crossDomain: true,
+                url: finalUrl+MethodCapture,
+                data:XML,
+                contentType: "text/xml; charset=utf-8",
+                processData: false,
+                success: function (data) {
+                    var xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data);
+                    //alert(xmlstr);
+                    data = xmlstr;
+                    //alert(data);
+                    httpStaus = true;
+                    res = { httpStaus: httpStaus, data: data };
+                            
+                    //$('#txtPidData').val(data);
+                    //$('#txtPidOptions').val(XML);
+                            
+                    console.log("================= txtPidData =========================");
+                    //console.log(data);
+                    $("#spinner_custom").hide(); 
+                    //FingerPrint Capture Timeout, Please try again
+                    if(data.indexOf("FingerPrint Capture Timeout")===-1){
+                        processPidBlock(data);
+                    }else{
+                        failCall("No_Reload","Fingerprint Capture Timed-out.Ensure that the finger is correctly placed on the scanner and try again");
+                    }
+                                
+                    var $doc = $.parseXML(data);
+                    var Message =  $($doc).find('Resp').attr('errInfo');
+                },
+                error: function (jqXHR, ajaxOptions, thrownError) {
+                    //$('#txtPidOptions').val(XML);
+                    failCall("","Error in PrecisionCapture.Error details : "+thrownError);
+                    res = { httpStaus: httpStaus, err: getHttpError(jqXHR) };
+                },
+            });
+                        
+            return res;
+                
+        }
+
+    
+    function SucessInfo(result,varVal )
+    {
+            //result = pidFormatting(result);
+             
+            if (varVal == 'pidBlockInfoVal') {              
+                //document.getElementById("pidBlockInfoVal").innerHTML = "";
+                //document.getElementById("pidBlockInfoVal").innerHTML = result;
+            } else {                    
+                document.getElementById("resValue").innerHTML = "";
+                document.getElementById("resValue").innerHTML = result;
+            }
+            //return result;
+    } 
+
+    function pidFormatting(str){     
+        return str.toString().replace(/"/g, '\\"');  
+    }
+    
+    function geteKYCAuthInputValues(pidBlockVal){
+         
+        var udcVal = $(pidBlockVal).find('DeviceInfo').attr('dc');      
+        return udcVal;  
+    }
+    
+    function processEKYCAuthAPI(uidVal,udcVal,pidVal) {
+        
+        
+        
+        
+        //eKYCBioInfoJquery(udcVal,pidVal);
+        
+        
+    //$("#aadhar_loading").show(); error is here nooor...........................
+
+    var aadharno = $('#aadharno').val();
+    
+    //var   uri     = "https://bfl-api-dev.azure-api.net/BFLEKYCWS/getBIOKYC";
+    var uri     = "https://bflapiprod.azure-api.net/BFLEKYCWS/getBIOKYC";
+    
+    // Get all user values from response
+    //var userImgSrc = 'man.jpg';
+    var homePageLink = "'index.html'";
+    var userName = "N/A";
+    var userGender = "N/A";
+    var userDOB = "N/A";
+    var userEmailId = "N/A";
+    var userPhoneNo = "N/A";
+    var userAddress = "N/A";
+    var userCity = "N/A";
+    var userState = "N/A";  
+    
+    var userImgSrc = 'data:image/png;base64,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';
+    
+    var image = new Image();
+    var theObject = {"aadharNumber": aadharno,"rdServiceData":pidVal,"udc":udcVal,"source":"MOBAPP"};
+    
+    }
+    
+    /*
+    For more info on the algorithm: http://en.wikipedia.org/wiki/Verhoeff_algorithm
+    by Sergey Petushkov, 2014
+    */
+
+    // multiplication table d
+    var d=[
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [1, 2, 3, 4, 0, 6, 7, 8, 9, 5], 
+        [2, 3, 4, 0, 1, 7, 8, 9, 5, 6], 
+        [3, 4, 0, 1, 2, 8, 9, 5, 6, 7], 
+        [4, 0, 1, 2, 3, 9, 5, 6, 7, 8], 
+        [5, 9, 8, 7, 6, 0, 4, 3, 2, 1], 
+        [6, 5, 9, 8, 7, 1, 0, 4, 3, 2], 
+        [7, 6, 5, 9, 8, 2, 1, 0, 4, 3], 
+        [8, 7, 6, 5, 9, 3, 2, 1, 0, 4], 
+        [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+    ];
+
+    // permutation table p
+    var p=[
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 
+        [1, 5, 7, 6, 2, 8, 3, 0, 9, 4], 
+        [5, 8, 0, 3, 7, 9, 6, 1, 4, 2], 
+        [8, 9, 1, 6, 0, 4, 3, 5, 2, 7], 
+        [9, 4, 5, 3, 1, 2, 6, 8, 7, 0], 
+        [4, 2, 8, 6, 5, 7, 3, 9, 0, 1], 
+        [2, 7, 9, 3, 8, 0, 6, 4, 1, 5], 
+        [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
+    ];
+
+    // inverse table inv
+    var inv = [0, 4, 3, 2, 1, 5, 6, 7, 8, 9];
+
+    // converts string or number to an array and inverts it
+    function invArray(array){
+        
+        if (Object.prototype.toString.call(array) == "[object Number]"){
+            array = String(array);
+        }
+        
+        if (Object.prototype.toString.call(array) == "[object String]"){
+            array = array.split("").map(Number);
+        }
+        
+        return array.reverse();
+        
+    }
+
+    // generates checksum
+    function generate(array){
+            
+        var c = 0;
+        var invertedArray = invArray(array);
+        
+        for (var i = 0; i < invertedArray.length; i++){
+            c = d[c][p[((i + 1) % 8)][invertedArray[i]]];
+        }
+        
+        return inv[c];
+    }
+
+    // validates checksum
+    function validate(array) {
+        
+        var c = 0;
+        var invertedArray = invArray(array);
+        
+        for (var i = 0; i < invertedArray.length; i++){
+            c=d[c][p[(i % 8)][invertedArray[i]]];
+        }
+
+        return (c === 0);
+    }
+</script>  
+            
+            
+            
+</body>
+</html>
+    </apex:page>

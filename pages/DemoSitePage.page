@@ -1,0 +1,5 @@
+<apex:page controller="DemoSitepageController">
+    <apex:form >
+        <apex:commandButton action="{!updateLeadRecord}" value="Update Lead" reRender="test" ></apex:commandButton>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,14 @@
+<apex:page controller="PaginationExampleController">
+    <apex:pageBlock >
+    	<apex:dataTable value="{!caseList}" var="caseItem" rowClasses="odd,even" styleClass="tableClass">
+            <apex:column >
+                <apex:facet name="header"><apex:outputLink value="Case Number">Case Number</apex:outputLink></apex:facet>
+                <apex:outputText >{!caseItem.caseNumber}</apex:outputText>
+            </apex:column>
+            <apex:column >
+            	<apex:facet name="header">Subject</apex:facet>
+                <apex:outputText >{!caseItem.Subject}</apex:outputText>
+            </apex:column>
+        </apex:dataTable>
+    </apex:pageBlock>
+</apex:page>

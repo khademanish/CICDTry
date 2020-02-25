@@ -1,0 +1,32 @@
+<aura:component >
+	<aura:attribute name="DayOfTheWeek" type="String"></aura:attribute>
+    
+    Today is 
+    
+    <aura:if isTrue="{!v.DayOfTheWeek=='Monday'}">
+        <aura:text value="Monday"></aura:text>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.DayOfTheWeek=='Tuesday'}">
+        <aura:text value="Tuesday"></aura:text>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.DayOfTheWeek=='Wednesday'}">
+        <aura:text value="Wednesday"></aura:text>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.DayOfTheWeek=='Thursday'}">
+        <aura:text value="Thursday"></aura:text>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.DayOfTheWeek=='Friday'}">
+        <aura:text value="Friday"></aura:text>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.DayOfTheWeek=='Saturday'}">
+        <aura:text value="Saturday"></aura:text>
+    </aura:if>
+        
+
+    
+</aura:component>

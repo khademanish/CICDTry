@@ -1,0 +1,6 @@
+<apex:page controller="sharingTestClass">
+    <apex:form >
+        {!access}
+        <apex:commandButton value="Click" action="{!callMethod}" />
+    </apex:form>
+</apex:page>

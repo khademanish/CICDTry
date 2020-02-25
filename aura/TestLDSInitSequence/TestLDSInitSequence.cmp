@@ -1,0 +1,21 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+    <aura:attribute name="CaseRecord" type="Case" />
+    <aura:attribute name="recordError" type="String"  description="An error message bound to force:recordData"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"></aura:handler>
+    
+    <force:recordData aura:id="recordCaseData"
+                      layoutType="FULL"
+                      recordId="{!v.recordId}"
+                      targetError="{!v.recordError}"
+                      targetRecord="{!v.record}"
+                      targetFields ="{!v.CaseRecord}"
+					  recordUpdated="{!c.handleRecordUpdated}"
+                      mode="EDIT"/>
+   <aura:if isTrue="{!not(empty(v.recordError))}">
+        <div class="recordError">
+            <ui:message title="Error" severity="error" >
+                {!v.recordError}
+            </ui:message>
+        </div>
+    </aura:if>
+</aura:component>

@@ -1,0 +1,32 @@
+<apex:page standardController="Account" extensions="barcodeController">
+  <apex:includeScript value="{!$Resource.jQuery}"/>
+  <apex:includeScript value="{!$Resource.jQueryBarcode}"/>
+  
+   <!--<div id="inputdata">{!Account.Name}</div>
+    <div id="externalbox" style="width:5in"></div>-->
+  <apex:form >
+  
+  <canvas id="canvasTarget" width="300" height="50"></canvas> 
+  
+    <apex:actionFunction name="passBarcode" action="{!test}" reRender="canvasTarget">
+        <apex:param name="firstparam" assignTo="{!barcode}" value="" />
+      </apex:actionFunction>
+      
+     <apex:commandButton onClick="setBarcode(); return false;" value="OK"  /> 
+   </apex:form>
+   <script type="text/javascript">
+   
+    $("#canvasTarget").barcode("123456789", "code128",{barWidth:2, barHeight:30,output:"canvas"});
+         
+      
+      var oCanvas = document.getElementById("canvasTarget");  
+      imageblob= oCanvas.toDataURL();  
+      var res = imageblob.split(",");
+      
+     function setBarcode(){
+     alert(res);
+         passBarcode(res);
+     }
+  
+    </script>
+</apex:page>

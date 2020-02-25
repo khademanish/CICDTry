@@ -1,0 +1,24 @@
+<apex:page controller="fruitController">
+
+     <apex:form > 
+ <apex:pageBlock >
+         <apex:pageBlockSection id="someId">
+         <apex:actionFunction name="populateFruits" action="{!getFruits}" reRender="someId" />
+         
+        <apex:selectList value="{!selected}" size="1" onchange="populateFruits()" >
+            <apex:selectOptions value="{!list1}"/>
+        </apex:selectList>
+     
+        <apex:selectList size="1" id="second">
+            <apex:selectOptions value="{!list2}" />
+        </apex:selectList>
+             
+         </apex:pageBlockSection>    
+    
+ </apex:pageBlock>
+ <apex:pageBlock >
+     <apex:commandButton value="test" action="{!redirect}" />
+     <iframe src="Page.DynamicTab"></iframe>
+ </apex:pageBlock>
+  </apex:form>
+</apex:page>

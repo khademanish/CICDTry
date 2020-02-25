@@ -1,0 +1,24 @@
+<apex:page sidebar="false"  standardController="Account" >
+ <apex:form >
+     <apex:pageBlock title="First Block">
+     
+     This is outside 'pageBlockSection'.
+     
+         <apex:pageBlockSection title="Section">
+             Hey , Welcome to SF team.
+             
+                 <apex:pageblockSectionItem >
+                          <apex:outputlabel value="Account Name"/>
+                         <apex:outputField value="{!account.name}"/>
+                 </apex:pageblockSectionItem>
+         </apex:pageBlockSection>
+         
+         <apex:pageblockSection title="User Information">
+                <apex:outputText value="{!$User.FirstName}" />  
+         </apex:pageblockSection>
+         
+         <br/>
+         Todays date is {!TODAY()}
+      </apex:pageBlock>
+ </apex:form>
+ </apex:page>

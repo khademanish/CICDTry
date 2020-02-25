@@ -1,0 +1,106 @@
+<apex:page >
+<html>
+<script src="{!URLFOR($Resource.NetworkJS)}"></script>
+	<script>
+		// Create a new Network instance by providing an optional object. 
+var settings = 
+    {
+    latency: {
+        // Where is located your `network.php` file. 
+        endpoint: 'https://kenrockwell.com/contax/images/g2/examples/31120037-5mb.jpg',
+        // How many measures should be returned. 
+        measures: 5,
+        // How much attempts to get a valid value should be done for each measure. 
+        attempts: 3
+    },
+ 
+    upload: {
+        // Where is located your `network.php` file. 
+        endpoint: 'www.google.com',
+        // The delay while you want to take measures. 
+        delay: 8000,
+ 
+        data: {
+            // The amount of data to initially use. 
+            size: 2 * 1024 * 1024, // 2 MB 
+ 
+            // If the measure period can't reach the delay defined in the settings, 
+            // the data amount is multiplied by the following value. 
+            multiplier: 2
+        }
+    },
+ 
+    download: {
+        // Where is located your `network.php` file. 
+        endpoint: 'https://kenrockwell.com/contax/images/g2/examples/31120037-5mb.jpg',
+        // The delay while you want to take measures. 
+        delay: 8000,
+ 
+        data: {
+            // The amount of data to initially use. 
+            size: 5 * 1024 * 1024, // 10 MB 
+ 
+            // If the measure period can't reach the delay defined in the settings, 
+            // the data amount is multiplied by the following value. 
+            multiplier: 2
+        }
+    
+}
+};
+ 
+var net = new Network(settings);
+ 
+// Listen for the "end" event which provides the calculated latencies. 
+net.latency.on('end', function(averageLatency, allLatencies) {
+    // "allLatencies" is an array containing the five calculated latencies in 
+    // milliseconds. They're used to determine an average latency. 
+    console.log('end', averageLatency, allLatencies);
+});
+ 
+// Once all the configuration is done, start the requests for this module. 
+net.latency.start();
+ 
+// It is possible to chain functions for all the modules, here's an example with the 
+// upload module. 
+/*net.upload
+     .on('start', function(dataSize) {
+         console.log('start', dataSize);
+     })
+     .on('progress', function(averageSpeed, instantSpeed) {
+         // Every bandwidth measure are in Mega BYTES per second! 
+         console.log('progress', averageSpeed, instantSpeed);
+     })
+     .on('restart', function(dataSize) {
+         // The restart event is triggered when the module didn't have time 
+         // (according to the `delay` option) to take all the measures. A new 
+         // request will start with data size increased by the multiplier value. 
+         console.log('restart', dataSize);
+     })
+     .on('end', function(averageSpeed, allInstantSpeeds) {
+         console.log('end', averageSpeed, allInstantSpeeds);
+     })
+     .start();
+ 
+// You can also cancel a request (except for the "latency" module). 
+net.upload.abort();
+ */
+/*net.download
+     .on('start', function(dataSize) {
+         console.log('start', dataSize);
+     })
+     .on('progress', function(averageSpeed, instantSpeed) {
+         console.log('progress', averageSpeed, instantSpeed);
+     })
+     .on('restart', function(dataSize) {
+         console.log('restart', dataSize);
+     })
+     .on('end', function(averageSpeed, allInstantSpeeds) {
+         console.log('end', averageSpeed, allInstantSpeeds);
+     })
+     .start();
+ 
+net.download.abort();
+*/
+	</script>
+</html>
+</apex:page>

@@ -1,0 +1,180 @@
+<apex:page controller="AadhaarKYCController" lightningStylesheets="true" showHeader="false" sidebar="false">
+<html>
+<head>
+<script src="{!URLFOR($Resource.PrecisionJquery)}"></script>
+
+<style type="text/css">
+	body {
+            font-family: 'Segoe UI';
+            background-color: #FFFFFF;
+            margin: 0px 5px 5px 5px;
+            padding: 0px 5px 5px 5px;
+            color: #555;
+            font-size: 12px;
+        }
+	.btn {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-bottom: 0px;
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1.42857;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            -moz-user-select: none;
+            background-image: none;
+            border: 1px solid transparent;
+            border-radius: 4px;
+			height:50px
+        }
+        .btn-50 {
+            width: 50px;
+        }
+        .btn-100 {
+            width: 100px;
+        }
+
+        .btn-150 {
+            width: 150px;
+        }
+
+        .btn-200 {
+            width: 205px;
+        }
+
+        .btn-primary {
+            color: #FFF;
+            background-color: #428BCA;
+            border-color: #357EBD;
+        }
+	
+</style>
+<script language="javascript" type="text/javascript">
+			var finalUrl="https://localhost:11152";
+			var MethodInfo="";
+			var MethodCapture="";
+			var pid_option = "";
+			var deviceinfo = "/rd/info";
+			var capture = "/rd/capture";
+			var finalport = ""; 
+			var icount=0;
+			var xmlstr  = "";
+			var status = "";
+			var i = 0;
+			function SendRDSERVICERequest(){
+			//	alert("RDSERVICE Request");
+			//for(i = 11100; i <= 11120; i++){
+					status = "";
+					xmlstr = "";
+					$.support.cors = true;
+					$.ajax({
+					type: "RDSERVICE",
+					async: false,
+					crossDomain: true,
+					url: finalUrl,
+					contentType: "text/xml; charset=utf-8",
+					processData: false,
+					cache: false,
+					async:false,
+					crossDomain:true,
+					success: function (data) {
+						xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data);
+						data = xmlstr;
+						$('#txtRDSInfo').val(xmlstr);
+						var $doc = $.parseXML(xmlstr);
+						
+						status =  $($doc).find('RDService').attr('status');
+						alert(status);
+						var CmbData2 =  $($doc).find('RDService').attr('info');
+						
+						
+					},
+					error: function (jqXHR, ajaxOptions, thrownError) {
+						alert(thrownError);
+					},
+					});
+					
+					if(xmlstr != null){
+						//alert("status:"+status.toString());
+						//alert("XML:"+xmlstr.toString());
+						if(xmlstr.indexOf('PB510') > 0)
+						{
+							alert("PB510");
+							if(status == "READY"){
+								alert("READY PB510");
+							}else if(status == "NOTREADY"){
+								alert("PB510 Not Ready");
+							}
+						}else{
+							alert("PB510 Device not connected or RD Service not available");
+						}
+					}else{
+						alert("PB510 Device not connected or RD Service not available");
+					}					
+				}	
+			function SendDeviceInfoRequest(){
+				$.ajax({
+				type: "DEVICEINFO",
+				async: false,
+				crossDomain: true,
+				url: finalUrl + deviceinfo,
+				contentType: "text/xml; charset=utf-8",
+				processData: false,
+				cache: false,
+				async:false,
+				crossDomain:true,
+				success: function (data) {
+				var xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data);
+				$('#txtDeviceInfo').val(xmlstr);
+				},
+				error: function (jqXHR, ajaxOptions, thrownError) {
+					//alert(url);
+					alert(thrownError);
+				},
+				});
+			}
+			function SendCAPTURERequest(){
+				
+				$.ajax({
+				type: "CAPTURE",
+				async: false,
+				crossDomain: true,
+				url: finalUrl + capture,
+				contentType: "text/xml; charset=utf-8",
+				processData: false,
+				cache: false,
+				async:false,
+				crossDomain:true,
+				data: "<PidOptions ver=\"1.0\"> <Opts fCount=\"1\" fType=\"0\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" env=\"PP\" /> </PidOptions>",
+				success: function (data) {
+				var xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data);
+				$('#txtCaptureFP').val(xmlstr);
+				},
+				error: function (jqXHR, ajaxOptions, thrownError) {
+					//alert(url);
+					alert(thrownError);
+				},
+				});
+			}
+		</script>
+</head>
+	<body>
+        <br/>
+        <br/>
+		<input class="btn btn-primary btn-200" type="button" value="RD SERVICE INFO" onclick="SendRDSERVICERequest();"/>
+		<input class="btn btn-primary btn-200" type="button" value="DEVICE INFO" onclick="SendDeviceInfoRequest();" />
+		<input class="btn btn-primary btn-200" type="button" value="CAPTURE FINGERPRINT" onclick="SendCAPTURERequest();" />
+        <br/><br/>
+		<label>RDService Info</label>
+		<textarea id="txtRDSInfo" style="width: 100%; height:150px;" class="form-control"> </textarea>
+        <br/><br/>
+		<label>Decvice Info</label>
+		<textarea id="txtDeviceInfo" style="width: 100%; height:150px;" class="form-control"> </textarea>
+        <br/><br/>
+		<label>Capture Fingerprint</label>
+		<textarea id="txtCaptureFP" style="width: 100%; height:150px;" class="form-control"> </textarea>
+	</body>
+</html>
+</apex:page>

@@ -1,0 +1,6 @@
+<aura:component access="global">
+    <c:TestChildCMP aura:id="testId" />
+    <lightning:input aura:id="buttonId" type="text" label="here" />
+    <lightning:input aura:id="buttonId" type="text" label="there" />
+    <lightning:button variant="brand" label="Next" onclick="{!c.testMethod}" />
+</aura:component>

@@ -1,0 +1,12 @@
+<aura:component controller="TimeManagerApexClass">
+    <aura:attribute name="fname" type="String" default="Ram"/>
+    <aura:attribute name="message" type="String" />
+    <aura:handler name="change" value="{!v.fname}" action="{!c.getTime}"/>
+    <ui:inputText label="Enter Your Name : " value="{!v.fname}"/>
+    <br/>
+    <br/>
+    Hello , {!v.fname}!!
+    <br/>
+    <br/>
+    {!v.message}
+</aura:component>

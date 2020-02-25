@@ -1,0 +1,9 @@
+<apex:page standardController="Employee__c">
+        <apex:pageblock >
+            <apex:tabPanel >
+                <apex:tab name="details" label="Employee" >
+                    <apex:detail relatedList="false"/>
+                </apex:tab>
+            </apex:tabPanel>
+        </apex:pageblock>
+</apex:page>

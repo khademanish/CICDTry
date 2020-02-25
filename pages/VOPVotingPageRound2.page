@@ -1,0 +1,202 @@
+<apex:page showHeader="false" sidebar="false" controller="VOPVotingPageController" standardStylesheets="false">
+    <apex:slds />
+    <apex:remoteObjects >
+        <apex:remoteObjectModel name="pslPractice__Vote2__c" jsShorthand="Vote"></apex:remoteObjectModel>
+    </apex:remoteObjects>
+    <html>
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            
+            <title>Voice Of Persistent</title>
+            
+            <!-- Mobile Specific Metas
+================================================== -->
+            <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            
+            <!-- Fonts -->
+            <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700' rel='stylesheet' type='text/css' />
+            <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" />
+            
+            <link href="{!URLFOR($Resource.VOPAssets,'css/bootstrap.min.css')}" rel="stylesheet" />
+            <link href="{!URLFOR($Resource.VOPAssets,'css/style.css')}" rel="stylesheet" />
+            <link href="{!URLFOR($Resource.VOPAssets,'css/responsive.css')}" rel="stylesheet" />
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+            
+        </head>
+        <style>
+            
+            .wrapper{
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000000000000000000000;
+            background-color: black;
+            opacity: 0.8;
+            display:none;
+            }
+            
+            .spinner {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            height:60px;
+            width:60px;
+            margin:0px auto;
+            -webkit-animation: rotation .6s infinite linear;
+            -moz-animation: rotation .6s infinite linear;
+            -o-animation: rotation .6s infinite linear;
+            animation: rotation .6s infinite linear;
+            border-left:6px solid rgba(0,174,239,.15);
+            border-right:6px solid rgba(0,174,239,.15);
+            border-bottom:6px solid rgba(0,174,239,.15);
+            border-top:6px solid rgba(0,174,239,.8);
+            border-radius:100%;
+            }
+            
+            @-webkit-keyframes rotation {
+            from {-webkit-transform: rotate(0deg);}
+            to {-webkit-transform: rotate(359deg);}
+            }
+            @-moz-keyframes rotation {
+            from {-moz-transform: rotate(0deg);}
+            to {-moz-transform: rotate(359deg);}
+            }
+            @-o-keyframes rotation {
+            from {-o-transform: rotate(0deg);}
+            to {-o-transform: rotate(359deg);}
+            }
+            @keyframes rotation {
+            from {transform: rotate(0deg);}
+            to {transform: rotate(359deg);}
+            }
+        </style>
+        <script>
+        window.onload = function() {
+            var anchors = document.getElementsByTagName('a');
+            for(var i = 0; i < anchors.length; i++) {
+                var anchor = anchors[i];
+                //anchor.addEventListener("click", function(){alert(1)}, false);
+                anchor.onclick = function() {
+                    var cName = getCookie("cookiestatusR2");
+                    if(cName == ''){
+                        document.getElementsByClassName('wrapper')[0].style.display = 'block';
+                        code = this.getAttribute('name');
+                        //alert(code);
+                        try{
+                            var voteDetails = { Name: code};
+                            var ct = new SObjectModel.Vote();
+                            ct.create(voteDetails, function(err) {
+                                if(err) { 
+                                    console.log(err);
+                                    alert(err.message);
+                                }
+                                else {
+                                    document.getElementById("btn_modal").click();
+                                    document.cookie = "cookiestatusR2=true";
+                                    var allanchors = document.getElementsByClassName('slds-col');
+                                    for(var i = 0; i<allanchors.length;i++){
+                                        allanchors[i].style.pointerEvents="none";
+                                        allanchors[i].style.pointerEvents="default";
+                                    }
+                                }
+                                document.getElementsByClassName('wrapper')[0].style.display = 'none';
+                            });
+                        }catch(e){
+                            alert(e);
+                        } 
+                    }else{
+                        document.getElementById('btn_modal1').click();
+                    }
+                    
+                }
+            }
+        }
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('window - DOMContentLoaded - capture'); // 1st
+            var cName = getCookie("cookiestatusR2");
+            //alert(cName);
+            if(cName == '')
+                console.log('cookie is not set');//document.cookie = "cookiestatusR2=true";
+            else{
+                var allanchors = document.getElementsByClassName('slds-col');
+                for(var i = 0; i<allanchors.length;i++){
+                    allanchors[i].style.pointerEvents="none";
+                    allanchors[i].style.pointerEvents="default";
+                }
+                document.getElementById('btn_modal1').click();
+            }
+            
+        }, true);
+        
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+        
+        </script>
+        <body>
+            <div class="wrapper">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="container hero">
+                <div class="row mainDiv" style="margin-top:10%; text-align:center">
+                    <span class="hero-text" style="display: inline-block;">Votings are closed for Round 2.</span>
+                </div>
+                
+            </div>
+            <button id="btn_modal" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" style="display:none;"></button>
+            <button id="btn_modal1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1" style="display:none;"></button>
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+                    
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-body" style="height: 50em;background : url('https://images-na.ssl-images-amazon.com/images/I/61Gis9qnDmL._SL1500_.jpg');opacity:0.5;">
+                            <center>
+                                <div>
+                                    <img src="{!URLFOR($Resource.VOPAssets,'img/thanks.png')}" style="width:23em; height:23em;" />
+                                </div>
+                                <p style="font-size: x-large;">Thank You ! Your response has been submitted successfully.</p>
+                            </center>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="modal fade" id="myModal1" role="dialog">
+                <div class="modal-dialog">
+                    
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-body" style="height: 50em;background : url('https://images-na.ssl-images-amazon.com/images/I/61Gis9qnDmL._SL1500_.jpg');opacity:0.5;">
+                            <center>
+                                <div>
+                                    <img src="{!URLFOR($Resource.VOPAssets,'img/thanks.png')}" style="width:23em; height:23em;" />
+                                </div>
+                                <p style="font-size: x-large;">You have already submitted your response.You will not be able to vote again.</p>
+                            </center>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </body>
+    </html>
+</apex:page>

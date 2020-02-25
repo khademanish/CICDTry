@@ -1,0 +1,11 @@
+<aura:component >
+    
+    <aura:attribute name="text" type="String" default="No Action."/>
+    <input type="Submit" value="Click Me !!" onclick="alert('manish');" /><br/>
+    
+    <input type="Submit" value="Click Me with call to Controller !" onclick="{!c.buttonAction}"/><br/>
+    
+    <ui:button label="Click me to feel framework" press="{!c.buttonAction}"/><br/>
+    
+    <br/>{!v.text}
+</aura:component>

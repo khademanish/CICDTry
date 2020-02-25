@@ -1,0 +1,11 @@
+<apex:page Controller="Mycontroller12" >
+  <apex:pageblock >
+  <apex:form >
+      <apex:pageblockTable value="{!employee}" var="emp">
+          <apex:column >
+              <apex:commandLink action="/apex/secondpage?id={!emp.id}" >{!emp.name}</apex:commandLink>
+          </apex:column>
+      </apex:pageblockTable>
+  </apex:form>
+  </apex:pageblock>
+</apex:page>

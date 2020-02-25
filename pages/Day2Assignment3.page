@@ -1,0 +1,16 @@
+<apex:page controller="PriceCalculation">
+<apex:form >
+  <apex:pageblock >
+      <apex:pageblockSection >
+          <apex:inputText value="{!unit_price}"  label="Unit Price"/>
+          <apex:inputText value="{!quantity}"  label="Quantity"/>
+          
+          <apex:outputText label="Total Price" id="total">{!total_price}</apex:outputText>
+      </apex:pageblockSection>
+      
+      <apex:pageBlockButtons >
+          <apex:commandButton value="Calculate" action="{!calculate}"  reRender="total" />
+      </apex:pageBlockButtons>
+  </apex:pageblock>
+ </apex:form>
+</apex:page>

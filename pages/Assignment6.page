@@ -1,0 +1,20 @@
+<apex:page standardController="Employee__c">
+<apex:form >
+<apex:pageblock title="New Employee Registration">
+    <apex:pageblockSection title="Enter Details">
+        <apex:inputField value="{!Employee__c.Name__c}"/>
+        <apex:inputField value="{!Employee__c.DOB__c}"/>
+        <apex:inputField value="{!Employee__c.Email_ID__c}"/>
+        <apex:inputField value="{!Employee__c.Mobile_No__c}"/>
+        <apex:inputfield value="{!Employee__c.State__c}"/>
+        <apex:inputfield value="{!Employee__c.City__c}"/>
+      </apex:pageblockSection>
+      
+
+      <apex:pageblockButtons location="bottom" >
+            <apex:commandButton value="Save" action="{!save}" />
+      </apex:pageblockButtons>
+
+</apex:pageblock>
+</apex:form>
+</apex:page>

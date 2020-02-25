@@ -1,0 +1,26 @@
+<apex:page sidebar="false" showHeader="false" docType="html-5.0" standardStylesheets="false">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </head>
+    <script>
+        var doc = new jsPDF();
+        var specialElementHandlers = {
+            '#editor': function (element, renderer) {
+                return true;
+            }
+        };
+        
+        $('#cmd').click(function () {
+            doc.fromHTML($('#content').html(), 15, 15, {
+                'width': 170,
+                    'elementHandlers': specialElementHandlers
+            });
+            doc.save('sample-file.pdf');
+        });
+        
+    </script>
+    <body>
+        <div id="div1">This is Div1</div>
+        <button id="cmd">Click Me !!</button>
+    </body>
+</apex:page>

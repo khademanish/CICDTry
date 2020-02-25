@@ -1,0 +1,4 @@
+<aura:component controller="TEST_GENERIC_CLASS">
+    <aura:attribute name="accountRecord" type="Account" />
+    <lightning:input aura:id="obName" type="text" value="{!v.accountRecord.Name}" label="Test Label" />
+</aura:component>

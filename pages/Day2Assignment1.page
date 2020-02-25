@@ -1,0 +1,5 @@
+<apex:page controller="MyFirstClass">
+    <apex:pageBlock >
+        {!month}
+    </apex:pageBlock>      
+</apex:page>

@@ -1,0 +1,6 @@
+<aura:component controller="DisplayCaseController" >
+    <aura:attribute name="record" type="Case"/>
+    {!v.record.Subject}<br/>
+    {!v.record.Description}<br/>
+    {!v.record.Status}<br/>
+</aura:component>

@@ -1,0 +1,9 @@
+<aura:component >
+    <aura:attribute name="text" type="String" default="0"/>
+    <ui:inputNumber aura:id="inputOne" label="Number one :"/>
+    <ui:inputNumber aura:id="inputTwo" label="Number two :"/>
+    <ui:inputNumber aura:id="inputThree" label="Number three :"/>
+    
+    <ui:outputText aura:id="totalValue" value="{!v.text}" /><br/>
+    <ui:button label="Submit" press="{!c.calculate}"/>
+</aura:component>
